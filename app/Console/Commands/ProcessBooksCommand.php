@@ -30,7 +30,7 @@ class ProcessBooksCommand extends Command
      *
      * @var string
      */
-    private $url = 'http://books.toscrape.com/catalogue/page-45.html';
+    private $url = 'http://books.toscrape.com/';
 
     /**
      * GoutteClient
@@ -38,7 +38,7 @@ class ProcessBooksCommand extends Command
      */
     private $client;
 
-    private $exchangeRate = 0.81;
+    private $exchangeRate = 1.25;
 
     /**
      * Create a new command instance.
@@ -76,7 +76,6 @@ class ProcessBooksCommand extends Command
 
             Log::info($this->currentUrl);
 
-
             $next = $crawler->filter('.pager .next a');
 
             $this->currentUrl = $next->getUri();
@@ -94,7 +93,7 @@ class ProcessBooksCommand extends Command
                 $description = trim($crawler->filter('article > p')->text());
                 $image = $crawler->filter('.thumbnail img')->image()->getUri();
                 $price = $this->getPrice($crawler->filter('.price_color'));
-                $currency = '£';
+                $currency = '$';
                 $rating = $this->getRating($crawler->filter('.star-rating'));
                 $upc = $crawler->filter('.table tr')->eq(0)->filter('td')->text();
 
@@ -118,11 +117,10 @@ class ProcessBooksCommand extends Command
             });
 
             if ($next->count() > 0) {
-                $this->warn('$next->count(): '.$next->count());
                 $crawler = $this->client->click($next->link());
             }
 
-        } while ($next);
+        } while ($next->count() > 0);
 
 
     }
@@ -148,11 +146,9 @@ class ProcessBooksCommand extends Command
     {
         $p = $node->text();
 
-        if (strpos($p, '£') !== false) {
-            $currency = '£';
-        }
-
         $price = str_replace('£', '', $p);
+
+        $price = $this->exchangeRate * ((float) $price);
 
         return $price;
     }
