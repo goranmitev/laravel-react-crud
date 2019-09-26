@@ -21,28 +21,6 @@ class BookController extends Controller
 
         $data = $query->paginate();
 
-        // $data->map(function ($book, $key) {
-
-        //     $actions = [];
-
-        //     $actions[] = ['name' => 'View', 'url' => route('books.show', ['book'=>$book])];
-
-        //     // $actions[] = ['name' => 'Edit', 'url' => route('books.edit', ['book' => $book])];
-
-        //     $actions[] = [
-        //         'name' => 'Delete',
-        //         'url' => route('books.destroy', ['book' => $book]),
-        //         'method' => 'DELETE',
-        //         'type' => 'form'
-        //     ];
-
-        //     $book->actions = $actions;
-
-        //     $book->price = $book->currency . $book->price;
-
-        //     return $book;
-        // });
-
         return response()->json(
             $data->toArray()
         );
@@ -77,7 +55,13 @@ class BookController extends Controller
      */
     public function show($id)
     {
-        //
+        $book = Book::find($id);
+
+        $book->load('category:id,name');
+
+        return response()->json(
+            $book->toArray()
+        );
     }
 
     /**
@@ -98,9 +82,24 @@ class BookController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Book $book)
     {
-        //
+
+        $rules = array(
+            'title' => 'required|unique:books,title,'.$book->id,
+            'description' => 'required',
+        );
+
+        $data = $request->validate($rules);
+
+        $book->title = $request->title;
+        $book->description = $request->description;
+        $book->save();
+
+        return response()->json(
+            $book->toArray()
+        );
+
     }
 
     /**
