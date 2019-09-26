@@ -25,6 +25,7 @@
         "sass-loader": "7.*"
     },
     "dependencies": {
-        "react-bootstrap": "^1.0.0-beta.12"
+        "react-bootstrap": "^1.0.0-beta.12",
+        "react-smart-data-table": "^0.7.1"
     }
 }
