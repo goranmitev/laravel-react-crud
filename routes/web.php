@@ -14,3 +14,6 @@
 Auth::routes();
 
 Route::get('/', 'HomeController@index')->name('home');
+
+Route::get('/books/{book}/edit', 'BookController@edit');
+Route::put('/books/{book}', 'BookController@update');

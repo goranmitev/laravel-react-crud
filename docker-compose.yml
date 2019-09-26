@@ -5,27 +5,13 @@ services:
     build:
       context: ./docker/app
     ports:
-      - 80:80
+      - 81:80
     volumes:
       - ./:/var/www/html
       - ./storage/logs/apache:/var/log/apache2:rw
     depends_on:
       - postgres
       - redis
-
-#   mysql:
-#     build: ./docker/mysql
-    # ports:
-    #   - "${LOCAL_DB_PORT}:3306"
-#     volumes:
-#       - ${HOST_VOLUME}/${LOCAL_PATH_TO_DB}:/var/lib/mysql
-# #      - ${HOST_VOLUME}/storage/InputData:/var/lib/mysql/TestData
-#       - ${HOST_VOLUME}/storage/tmp:/docker-entrypoint-initdb.d
-#     environment:
-#       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-#       MYSQL_DATABASE: ${DB_DATABASE}
-#       MYSQL_USER: ${DB_USERNAME}
-#       MYSQL_PASSWORD: ${DB_PASSWORD}
 
   redis:
     image: redis:latest

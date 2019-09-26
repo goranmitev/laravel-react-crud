@@ -1,6 +1,7 @@
 import React from 'react';
 import Table from 'react-bootstrap/Table';
 import Pagination from 'react-bootstrap/Pagination';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
 class DataGrid extends React.Component {
 
@@ -8,6 +9,7 @@ class DataGrid extends React.Component {
         super(props);
 
         this.state = {
+            url: '/api/books',
             data: [],
             pageData: [],
             isFetching: false
@@ -20,7 +22,16 @@ class DataGrid extends React.Component {
             isFetching: true
         });
 
-        axios.get('/api/books')
+        this.fetchData(this.state.url);
+    }
+
+    fetchData(url) {
+
+        if (url === null) {
+            return false;
+        }
+
+        axios.get(url)
             .then((response) => {
                 this.setState({
                     data: response.data.data,
@@ -42,26 +53,33 @@ class DataGrid extends React.Component {
         const { data, pageData, isFetching } = this.state;
 
         if (isFetching) {
-            console.log('in Rendertable data');
-            console.log(data);
-
             return [];
         }
         return data.map((book, index) => {
             const { id, title, image } = book; //destructuring
+            const editUrl = "/books/"+id+"/edit";
             return (
                 <tr key={id}>
                     <td>{id}</td>
                     <td><img height="50" src={image}/></td>
                     <td>{title}</td>
                     <td>
-                        <a href="edit">Edit</a>
-
-                        <a href="delete">Delete</a>
+                        <Link to={editUrl}>Edit</Link>
+                        {/* <a href={editUrl}>Edit</a> */}
                     </td>
                 </tr>
             )
         });
+    }
+
+    handleNextPageClick(e) {
+        e.preventDefault();
+        this.fetchData(this.state.pageData.next_page_url);
+    }
+
+    handlePrevPageClick(e) {
+        e.preventDefault();
+        this.fetchData(this.state.pageData.prev_page_url);
     }
 
     renderPagination() {
@@ -71,10 +89,11 @@ class DataGrid extends React.Component {
 
         return (
             <Pagination>
-                <Pagination.Prev />
+                <Pagination.Prev onClick={(e) => this.handlePrevPageClick(e)} />
                 <Pagination.Item>Page {active} of {total}</Pagination.Item>
-                <Pagination.Next />
+                <Pagination.Next onClick={(e) => this.handleNextPageClick(e)} />
             </Pagination>
+
         );
     }
 
