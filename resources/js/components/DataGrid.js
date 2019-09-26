@@ -1,8 +1,6 @@
 import React from 'react';
-// import Row from 'react-bootstrap/Row';
-// import Col from 'react-bootstrap/Col';
-// import Table from 'react-bootstrap/Table';
-import SmartDataTable from 'react-smart-data-table'
+import Table from 'react-bootstrap/Table';
+import Pagination from 'react-bootstrap/Pagination';
 
 class DataGrid extends React.Component {
 
@@ -11,6 +9,7 @@ class DataGrid extends React.Component {
 
         this.state = {
             data: [],
+            pageData: [],
             isFetching: false
         };
     }
@@ -23,10 +22,9 @@ class DataGrid extends React.Component {
 
         axios.get('/api/books')
             .then((response) => {
-                console.log(response);
-
                 this.setState({
-                    data: response.data,
+                    data: response.data.data,
+                    pageData: response.data,
                     isFetching: false
                 });
             })
@@ -38,164 +36,83 @@ class DataGrid extends React.Component {
             });
     }
 
+
+    renderTableData() {
+
+        const { data, pageData, isFetching } = this.state;
+
+        if (isFetching) {
+            console.log('in Rendertable data');
+            console.log(data);
+
+            return [];
+        }
+        return data.map((book, index) => {
+            const { id, title, image } = book; //destructuring
+            return (
+                <tr key={id}>
+                    <td>{id}</td>
+                    <td><img height="50" src={image}/></td>
+                    <td>{title}</td>
+                    <td>
+                        <a href="edit">Edit</a>
+
+                        <a href="delete">Delete</a>
+                    </td>
+                </tr>
+            )
+        });
+    }
+
+    renderPagination() {
+
+        let active = this.state.pageData.current_page;
+        let total = this.state.pageData.last_page;
+
+        return (
+            <Pagination>
+                <Pagination.Prev />
+                <Pagination.Item>Page {active} of {total}</Pagination.Item>
+                <Pagination.Next />
+            </Pagination>
+        );
+    }
+
     render() {
-
-        const sematicUI = {
-            segment: 'ui basic segment',
-            message: 'ui message',
-            input: 'ui icon input',
-            searchIcon: 'search icon',
-            rowsIcon: 'numbered list icon',
-            table: 'ui compact selectable table',
-            select: 'ui dropdown',
-            refresh: 'ui labeled primary icon button',
-            refreshIcon: 'sync alternate icon',
-            change: 'ui labeled secondary icon button',
-            changeIcon: 'exchange icon',
-            checkbox: 'ui toggle checkbox',
-            loader: 'ui active text loader',
-            deleteIcon: 'trash red icon',
-        }
-
-        const headers = {
-            id: {
-                text: 'ID',
-                invisible: false,
-            },
-            title: {
-                text: 'Title',
-                invisible: false,
-            },
-            'category.name': {
-                text: 'Category',
-                invisible: false,
-            },
-            'category.id': {
-                invisible: true
-            },
-            category_id: {
-                invisible: true
-            },
-            created_at: {
-                invisible: true
-            },
-            updated_at: {
-                invisible: true
-            },
-            description: {
-                invisible: true
-            },
-
-            price: {
-                text: 'Price',
-                invisible: false
-            },
-            currency: {
-                invisible: true
-            },
-            image: {
-                invisible: true
-            },
-
-
-
-            actionsd: {
-                text: 'Actions',
-                sortable: false,
-                filterable: false,
-                transform: (value, idx, row) => (
-                    <i
-                        className={sematicUI.deleteIcon}
-                        style={{ cursor: 'pointer' }}
-                        // onClick={(e) => this.handleDelete(e, idx, row)}
-                        // onKeyDown={(e) => this.handleDelete(e, idx, row)}
-                        role='button'
-                        tabIndex='0'
-                        aria-label='delete row'
-                    />
-                ),
-            },
-
-            // If a dummy column is inserted into the data, it can be used to customize
-            // the table by allowing actions per row to be implemented, for example
-            // tableActions: {
-            //     text: 'Actions',
-            //     invisible: false,
-            //     sortable: false,
-            //     filterable: false,
-            //     transform: (value, index, row) => {
-            //         // The following results should be identical
-            //         console.log(value, row.tableActions)
-            //         // Example of table actions: Delete row from data by row index
-            //         return (
-            //             <button onClick={() => deleteRow(row)}>
-            //                 Delete Row
-            //       </button>
-            //         )
-            //     },
-            // },
-        }
-
 
         return (
             <div>
-                <SmartDataTable
-                    data={this.state.data.data}
-                    headers={headers}
-                    // orderedHeaders={[
-                    //     'id',
-                    //     'title',
-                    //     'category.name',
-                    //     'price',
-                    //     'rating',
-                    //     'upc',
-                    //     'actions',
-                    //   ]}
-                    name='books-table'
-                    withLinks
-                    hideUnordered
-                    className='ui compact selectable table'
+                <p>Showing Books: {this.state.pageData.from} - {this.state.pageData.to} out of {this.state.pageData.total}</p>
+                <Table>
+                    <thead>
+                        <tr>
+                            <th>
+                                ID
+                            </th>
+                            <th>
+                                Image
+                            </th>
+                            <th>
+                                Title
+                            </th>
+                            <th>
+                                Actions
+                            </th>
 
-                />,
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {this.renderTableData()}
+                    </tbody>
+                </Table>
+
+                {this.renderPagination()}
+
                 <p>{this.state.isFetching ? 'Fetching books...' : ''}</p>
             </div>
 
         );
 
-
-        //             <table class="table-admin">
-        //                 <thead>
-        //                     <tr>
-        //                         <th v-for="(th, index) in table.columns" : key="index">
-        //             <a href="#" v-if="th.sortable" @click.prevent="onSort(index)">
-        //                 {{ th.label }}
-        //                         <i class="fa fa-sort-down" v-if="sorting.direction=='asc' && sorting.sort==index"></i>
-        //                         <i class="fa fa-sort-up" v-else-if="sorting.direction=='desc' && sorting.sort==index"></i>
-        //                         <i class="fa fa-sort" v-else></i>
-        //             </a>
-        //                     <span v-else>{{ th.label }}</span>
-        //         </th>
-        //     </tr>
-        // </thead >
-        //             <tbody>
-        //                 <tr v-if="filtering">
-        //                     <td v-for="(column, index) in table.columns" : key="index">
-        //             <input type="text" class="form-control" v-if="column.filterable && column.filter=='text'" @keyup="onFilter(column, index, $event.target.value)">
-        //             <select class="form-control" v-if="column.filterable && column.filter=='select'" @change="onFilter(column, index, $event.target.value)">
-        //                 <option value="">Please select</option>
-        //                     <option v-for="(option, value) in column.filterOptions" : value="value" :key="value">{{ option }}</option>
-        //             </select>
-        //         </td >
-        //     </tr >
-        //             <tr v-for="(row, rowIndex) in table.records.data" : key="rowIndex">
-        //                 <td v-for="(column, columnIndex) in table.columns" : key="columnIndex">
-        //             <component v-if="column.type" v-bind: is="column.type" v-bind:options="getOptions(row, column, columnIndex)"></component>
-        //             <template v-else>{{ getItem(row, columnIndex) }}</template>
-        //         </td >
-        //     </tr >
-        // </tbody >
-        // </table >
-        // );
     }
 
 }
