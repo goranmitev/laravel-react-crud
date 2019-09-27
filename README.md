@@ -8,6 +8,10 @@ Clone the repository
 
 `git clone https://github.com/goranmitev/laravel-react-crud.git`
 
+Navigate to the project dir
+
+`cd laravel-react-crud`
+
 Copy the .env file (modify if needed)
 
 `cp .env.example .env`
@@ -32,9 +36,13 @@ Compile npm packages
 
 `npm run dev`
 
-Run the command for scrapping the books data
+Run migrations and initial user seeder
 
-`php artisan process:books`
+`docker-compose exec app php artisan migrate:fresh --seed`
+
+### Run the command for scrapping the books data
+
+`docker-compose exec app php artisan process:books`
 
 Open the app
 
