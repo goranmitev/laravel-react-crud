@@ -2,6 +2,7 @@ import React from 'react';
 import Table from 'react-bootstrap/Table';
 import Pagination from 'react-bootstrap/Pagination';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import Spinner from 'react-bootstrap/Spinner';
 
 class DataGrid extends React.Component {
 
@@ -97,11 +98,31 @@ class DataGrid extends React.Component {
         );
     }
 
+    renderShowing() {
+        return (
+            <p>Showing Books: {this.state.pageData.from} - {this.state.pageData.to} out of {this.state.pageData.total}</p>
+        );
+    }
+
     render() {
 
+        if (this.state.isFetching) {
+            return (
+                <Spinner animation="border" role="status">
+                    <span className="sr-only">Loading...</span>
+                </Spinner>
+            );
+        } else {
+
+            const createUrl = "/books/create";
         return (
             <div>
-                <p>Showing Books: {this.state.pageData.from} - {this.state.pageData.to} out of {this.state.pageData.total}</p>
+                <Link to={createUrl}>Create New Book</Link>
+                <br/>
+                <br/>
+
+                {this.renderShowing()}
+
                 <Table>
                     <thead>
                         <tr>
@@ -131,7 +152,7 @@ class DataGrid extends React.Component {
             </div>
 
         );
-
+        }
     }
 
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Book;
+use App\Category;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
@@ -44,7 +45,31 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = array(
+            'title' => 'required|unique:books',
+            'description' => 'required',
+            'category_id' => 'integer|required',
+            'price' => 'numeric|required',
+            'upc' => 'required'
+        );
+
+        $data = $request->validate($rules);
+
+        $book = new Book();
+
+        $book->title = $request->title;
+        $book->category_id = $request->category_id;
+        $book->description = $request->description;
+        $book->price = $request->price;
+        $book->currency = $request->currency;
+        $book->upc = $request->upc;
+        $book->save();
+
+
+        return response()->json([
+            'id' => $book->id,
+            'success' => true
+        ]);
     }
 
     /**
@@ -57,11 +82,14 @@ class BookController extends Controller
     {
         $book = Book::find($id);
 
+        $categories = Category::all();
+
         $book->load('category:id,name');
 
-        return response()->json(
-            $book->toArray()
-        );
+        return response()->json([
+            'book' =>  $book,
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -88,12 +116,18 @@ class BookController extends Controller
         $rules = array(
             'title' => 'required|unique:books,title,'.$book->id,
             'description' => 'required',
+            'category_id' => 'integer|required',
+            'price' => 'numeric|required',
+            'upc' => 'required'
         );
 
         $data = $request->validate($rules);
 
         $book->title = $request->title;
+        $book->category_id = $request->category_id;
         $book->description = $request->description;
+        $book->price = $request->price;
+        $book->upc = $request->upc;
         $book->save();
 
         return response()->json([
@@ -112,5 +146,14 @@ class BookController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function categories()
+    {
+        $categories = Category::all();
+
+        return response()->json([
+            'categories' => $categories
+        ]);
     }
 }

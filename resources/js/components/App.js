@@ -5,6 +5,7 @@ import Container from 'react-bootstrap/Container';
 
 import DataGrid from './DataGrid';
 import EditBookForm from './EditBookForm';
+import CreateBookForm from './CreateBookForm';
 
 
 class App extends React.Component {
@@ -19,6 +20,7 @@ class App extends React.Component {
                 <Container>
                         <Route exact path='/' component={DataGrid} />
                         <Route path='/books/:id/edit' component={EditBookForm} />
+                        <Route path='/books/create' component={CreateBookForm} />
                  </Container>
             </Router>
         );

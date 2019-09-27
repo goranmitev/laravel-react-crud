@@ -5,8 +5,9 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import Alert from 'react-bootstrap/Alert';
 import Spinner from 'react-bootstrap/Spinner';
 import InputGroup from 'react-bootstrap/InputGroup';
+import { Redirect } from 'react-router-dom';
 
-class EditBookForm extends React.Component {
+class CreateBookForm extends React.Component {
 
     constructor(props) {
         super(props);
@@ -18,13 +19,14 @@ class EditBookForm extends React.Component {
             failed: false,
             form: {
                 title: '',
-                category_id: '',
+                category_id: 1,
                 description: '',
+                currency: '$',
                 price: '',
                 upc: '',
             },
-            categories: [],
             errors: [],
+            categories: []
         };
 
         this.changeHandler = this.changeHandler.bind(this);
@@ -48,19 +50,18 @@ class EditBookForm extends React.Component {
     }
 
     componentDidMount() {
-        this.fetchData(this.state.id);
+        this.fetchCategories();
     }
 
-    fetchData(id) {
+    fetchCategories() {
 
         this.setState({
             isFetching: true
         });
 
-        axios.get('/api/books/' + id)
+        axios.get('/api/categories')
             .then((response) => {
                 this.setState({
-                    form: response.data.book,
                     categories: response.data.categories,
                     isFetching: false
                 });
@@ -83,24 +84,23 @@ class EditBookForm extends React.Component {
             failed: false,
         });
 
-        axios.put('/api/books/' + this.state.id, this.state.form)
+        axios.post('/api/books', this.state.form)
             .then((response) => {
-                this.setState({
-                    form: response.data.book,
-                    isFetching: false,
-                    success: response.data.success,
-                    failed: false,
-                    submitting: false
-                });
+                const editUrl = "/books/"+response.data.id+"/edit";
+
+                if (response.data.success) {
+                    window.location.replace(editUrl);
+                }
+
             })
-            .catch((error) => {
-                console.log(error);
+            .catch((errors) => {
+                // console.log(errors);
                 this.setState({
                     isFetching: false,
                     success: false,
                     failed: true,
                     submitting: false,
-                    errors: error.response.data.errors
+                    errors: errors.response.data.errors
                 });
             });
     }
@@ -148,7 +148,7 @@ class EditBookForm extends React.Component {
                         <Link to='/'>View All books</Link>
                         <br />
                         <br />
-                        <h1>Edit Book</h1>
+                        <h1>Create New Book</h1>
                     </div>
 
                     <Alert show={this.state.success} variant='success'>
@@ -161,6 +161,8 @@ class EditBookForm extends React.Component {
                             {this.renderErrors()}
                         </ul>
                     </Alert>
+
+
 
                     <Form.Group controlId="title">
                         <Form.Label>Title</Form.Label>
@@ -234,4 +236,4 @@ class EditBookForm extends React.Component {
 
 }
 
-export default EditBookForm;
+export default CreateBookForm;

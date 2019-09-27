@@ -18,10 +18,10 @@ class CreateBooksTable extends Migration
             $table->unsignedInteger('category_id');
             $table->string('title');
             $table->text('description');
-            $table->string('image');
+            $table->string('image')->nullable();
             $table->decimal('price');
-            $table->string('currency');
-            $table->integer('rating');
+            $table->string('currency')->nullable();
+            $table->integer('rating')->nullable()->default(0);
             $table->string('upc');
             $table->timestamps();
 
