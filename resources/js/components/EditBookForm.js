@@ -2,6 +2,8 @@ import React from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import Alert from 'react-bootstrap/Alert';
+import Spinner from 'react-bootstrap/Spinner';
 
 class EditBookForm extends React.Component {
 
@@ -11,21 +13,31 @@ class EditBookForm extends React.Component {
         this.state = {
             id: props.match.params.id,
             isFetching: false,
-            data: []
+            success: false,
+            failed: false,
+            form: {
+                title: '',
+                description: ''
+            }
         };
 
-        this.handleInputChange = this.handleInputChange.bind(this);
+        this.changeHandler = this.changeHandler.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
     }
 
-    handleInputChange(event) {
-        const target = event.target;
-        const value = target.type === 'checkbox' ? target.checked : target.value;
-        const name = target.name;
+    changeHandler(event) {
+
+        const name = event.target.name;
+        const value = event.target.value;
+
+        var form = { ...this.state.form }
+        form[name] = value;
+        this.setState({ form });
 
         this.setState({
-            name: value
+            success: false,
+            failed: false
         });
     }
 
@@ -42,7 +54,7 @@ class EditBookForm extends React.Component {
         axios.get('/api/books/' + id)
             .then((response) => {
                 this.setState({
-                    data: response.data,
+                    form: response.data,
                     isFetching: false
                 });
             })
@@ -58,17 +70,29 @@ class EditBookForm extends React.Component {
         event.preventDefault();
         event.stopPropagation();
 
-        axios.put('/api/books/' + this.state.id, this.state.data)
+        this.setState({
+            submitting: true,
+            success: false,
+            failed: false,
+        });
+
+        axios.put('/api/books/' + this.state.id, this.state.form)
             .then((response) => {
                 this.setState({
-                    data: response.data,
-                    isFetching: false
+                    form: response.data.book,
+                    isFetching: false,
+                    success: response.data.success,
+                    failed: false,
+                    submitting: false
                 });
             })
             .catch((error) => {
                 console.log(error);
                 this.setState({
-                    isFetching: false
+                    isFetching: false,
+                    success: false,
+                    failed: true,
+                    submitting: false
                 });
             });
     }
@@ -76,39 +100,60 @@ class EditBookForm extends React.Component {
 
     render() {
 
-        const { title, description } = this.state.data;
+        const { title, description } = this.state.form;
 
-        return (
-            <Form onSubmit={(e) => this.handleSubmit(e)}>
-                <div>
-                    <Link to='/'>View All books</Link>
-                    <br />
-                    <br />
-                </div>
-                <Form.Group controlId="title">
-                    <Form.Label>Title</Form.Label>
-                    <Form.Control type="text" placeholder="Enter book title" value={title} onChange={(e) => this.handleInputChange(e)} />
-                </Form.Group>
+        if (!this.state.isFetching) {
+            return (
+                <Form onSubmit={this.handleSubmit}>
+                    <div>
+                        <Link to='/'>View All books</Link>
+                        <br />
+                        <br />
+                    </div>
 
-                <input
-            name="isGoing"
-            type="checkbox"
-            checked={this.state.isGoing}
-            onChange={this.handleInputChange} />
+                    <Alert show={this.state.success} variant='success'>
+                        Book Saved!
+                </Alert>
 
-                <Form.Group controlId="description">
-                    <Form.Label>Description</Form.Label>
-                    <Form.Control type="text" placeholder="Description" value={description} onChange={(e) => this.handleInputChange(e)} />
-                </Form.Group>
+                    <Alert show={this.state.failed} variant='danger'>
+                        Error saving book!
+                </Alert>
 
-                <Button variant="primary" type="submit">
-                    Submit
-                </Button>
+                    <Form.Group controlId="title">
+                        <Form.Label>Title</Form.Label>
+                        <Form.Control
+                            name="title"
+                            type="text"
+                            placeholder="Enter book title"
+                            defaultValue={title}
+                            onChange={this.changeHandler} />
+                    </Form.Group>
 
-            </Form>
+                    <Form.Group controlId="description">
+                        <Form.Label>Description</Form.Label>
+                        <Form.Control as="textarea"
+                            name="description"
+                            type="text"
+                            placeholder="Description"
+                            value={description}
+                            onChange={this.changeHandler} />
+                    </Form.Group>
+
+                    <Button disabled={this.state.submitting} variant="primary" type="submit">
+                        Submit
+                    </Button>
+
+                </Form>
 
 
-        );
+            );
+        } else {
+            return (
+                <Spinner animation="border" role="status">
+                    <span className="sr-only">Loading...</span>
+                </Spinner>
+            );
+        }
 
     }
 

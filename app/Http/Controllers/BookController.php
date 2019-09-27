@@ -96,9 +96,10 @@ class BookController extends Controller
         $book->description = $request->description;
         $book->save();
 
-        return response()->json(
-            $book->toArray()
-        );
+        return response()->json([
+            'book' => $book,
+            'success' => true
+        ]);
 
     }
 
