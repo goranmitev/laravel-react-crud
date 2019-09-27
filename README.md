@@ -4,8 +4,8 @@ Web application that scraps data from http://books.toscrape.com/ and stores it i
 
 Clone the repository
 
-### `git clone https://github.com/goranmitev/laravel-react-crud.git`
+`git clone https://github.com/goranmitev/laravel-react-crud.git`
 
 Run docker compose build
 
-### `docker-compose build`
+`docker-compose build`
